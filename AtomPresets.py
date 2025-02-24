@@ -1,4 +1,5 @@
 import pygame
+<<<<<<< HEAD
 
 # Adjusted atom sizes (scaled down to fit 400x800 screen)
 AtomImages = {
@@ -15,3 +16,9 @@ AtomImages = {
     "Sodium": pygame.transform.scale(pygame.image.load('Assets/AtomImages/Sodium.png'), (180, 180)),
     "Sulfur": pygame.transform.scale(pygame.image.load('Assets/AtomImages/Sulfur.png'), (100, 100)),
 }
+=======
+AtomImages = {
+    "Hydrogen" : pygame.transform.scale(pygame.image.load('Assets/AtomImages/Hydrogen.webp'), (50,50)),
+    "Oxygen" : pygame.transform.scale(pygame.image.load('Assets/AtomImages/Oxygen.webp'), (50,50))
+}
+>>>>>>> d9570deb8de078f436a04cd8ade2191a695a6bb7
