@@ -78,6 +78,7 @@ while True:
     
     if AddButton.draw():
         newAtom("Hydrogen")
+        newAtom("Oxygen")
 
     pygame.display.update()
     clock.tick(30)
