@@ -1,9 +1,5 @@
 import pygame
-<<<<<<< HEAD
 from AtomHandler import Atom
-=======
-from AtomPhysics import *
->>>>>>> d9570deb8de078f436a04cd8ade2191a695a6bb7
 from sys import exit
 from AtomPresets import AtomImages
 
@@ -13,12 +9,8 @@ SCREEN_WIDTH = 800
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
-<<<<<<< HEAD
 
 AtomList = []
-=======
-Vector2 = pygame.math.Vector2
->>>>>>> d9570deb8de078f436a04cd8ade2191a695a6bb7
 
 # Window Title
 pygame.display.set_caption("Chemistry Editor")
@@ -58,7 +50,6 @@ class Button():
 
         return action
 
-<<<<<<< HEAD
 # Buttons
 AddButton = Button(SCREEN_WIDTH - 75, SCREEN_HEIGHT - 75, AddButtonImage, 75)
 
@@ -66,22 +57,12 @@ AddButton = Button(SCREEN_WIDTH - 75, SCREEN_HEIGHT - 75, AddButtonImage, 75)
 def newAtom(Type):
     AtomList.append(Atom(Type, AtomImages[Type]))
 
-=======
-class Atom():
-    def __init__(self):
-        return 'not yet!!!!'
-
-# Buttons
-AddButton = Button(SCREEN_WIDTH - 75, SCREEN_HEIGHT - 75, AddButtonImage, 75)
-
->>>>>>> d9570deb8de078f436a04cd8ade2191a695a6bb7
 # Renderer
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-<<<<<<< HEAD
         
         # prevent multi dragging bug
         for atom in reversed(AtomList):
@@ -97,19 +78,6 @@ while True:
     
     if AddButton.draw():
         newAtom("Hydrogen")
-        newAtom("Oxygen")
-        newAtom("Chlorine")
 
     pygame.display.update()
-=======
-
-    screen.fill((0, 15, 38))
-
-    screen.blit(Information, text_rect)
-    if AddButton.draw():
-        print('START')
-
-    pygame.display.update()
-    # frame rate
->>>>>>> d9570deb8de078f436a04cd8ade2191a695a6bb7
     clock.tick(30)

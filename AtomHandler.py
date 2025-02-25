@@ -12,6 +12,7 @@ class Atom():
         self.yvel = 0
 
         self.rect = self.type.get_rect()
+        self.scale = image.get_width()
         self.rect.topleft = (self.x, self.y)
 
         self.dragging = False  
@@ -55,6 +56,16 @@ class Atom():
             self.y += self.yvel
             self.xvel *= 0.9
             self.yvel *= 0.9
+
+            # edges
+            print(self.x > 800)
+            if self.x > 800:
+                self.x = 1
+                self.xvel *= -1
+
+            if abs(self.y) > 400:
+                self.yvel *= -1
+
 
         self.prev_pos = Vector2(self.x, self.y)
         self.rect.topleft = (self.x, self.y)
