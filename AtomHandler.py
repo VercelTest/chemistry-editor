@@ -7,6 +7,7 @@ Vector2 = pygame.math.Vector2
 
 class Atom():
     def __init__(self, type, image):
+        self.name = type
         self.type = image
         self.ValenceElectronType = AtomValenceValues[type]
         self.x = 400
@@ -24,17 +25,17 @@ class Atom():
         self.offset = Vector2(0, 0)
         self.prev_pos = Vector2(self.x, self.y)
 
-    def check_dragging_priority(self, event):
+    def check_dragging_priority(self, event, Mode):
         global selected_atom
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos) and selected_atom is None:
-                
-                self.dragging = True
-                mousepos = pygame.mouse.get_pos()
-                self.offset = Vector2(mousepos[0] - self.x, mousepos[1] - self.y)
 
-                selected_atom = self
+                if Mode == "Drag":
+                    self.dragging = True
+                    mousepos = pygame.mouse.get_pos()
+                    self.offset = Vector2(mousepos[0] - self.x, mousepos[1] - self.y)
+                    selected_atom = self
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if self.dragging:
@@ -99,9 +100,18 @@ class Atom():
         self.prev_pos = Vector2(self.x, self.y)
         self.rect.topleft = (self.x, self.y)
 
-    def physics(self):
+    def physics(self, Mode):
+        mousepos = pygame.mouse.get_pos()
+        
         if not self.bonded:
             self.freephysics()
+
+        if self.rect.collidepoint(mousepos):
+            if Mode == "View":
+                    if not self.bonded:
+                        return str(self.name) + ", " + str(self.ElectronsLeft) + " Valence Electron(s)"
+                    else:
+                        return "this is not available yet"
 
     def draw(self, screen):
         screen.blit(self.type, (self.x, self.y))
