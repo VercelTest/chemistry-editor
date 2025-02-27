@@ -11,7 +11,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
 AtomList = []
-Mode = "Drag"
+Mode = "Drag"  # Modes: "Drag", "Add", "View", "Bond"
 OverrideInformation = False
 user_text = ''
 
@@ -29,6 +29,7 @@ pause_screen.fill('black')
 
 AddButtonImage = pygame.image.load('Assets/Buttons/Add Button.png').convert_alpha()
 ViewButtonImage = pygame.image.load('Assets/Buttons/Magnifying.png').convert_alpha()
+BondButtonImage = pygame.image.load('Assets/Buttons/Bond Button.png').convert_alpha()  # Replace with actual bond button image
 
 # Classes
 class Button():
@@ -59,7 +60,8 @@ class Button():
 # Buttons
 AddButton = Button(SCREEN_WIDTH - 75, SCREEN_HEIGHT - 75, AddButtonImage, 75)
 ViewButton = Button(SCREEN_WIDTH - 150, SCREEN_HEIGHT - 75, ViewButtonImage, 75)
-
+# Add bond button position
+BondButton = Button(SCREEN_WIDTH - 225, SCREEN_HEIGHT - 75, BondButtonImage, 75)
 
 # Functions
 def newAtom(Type):
@@ -92,7 +94,8 @@ while True:
     screen.fill((0, 15, 38))
 
     for atom in AtomList:
-        data = atom.physics(Mode)  # Update physics
+        # Pass screen dimensions to physics method
+        data = atom.physics(Mode, AtomList, SCREEN_WIDTH, SCREEN_HEIGHT)  
         atom.draw(screen)
 
         if data:
@@ -104,10 +107,17 @@ while True:
         user_text = ''
     
     if ViewButton.draw():
-        if Mode == "Drag":
+        if Mode == "Drag" or Mode == "Bond":
             Mode = "View"
         elif Mode == "View":
             Mode = "Drag"
+    
+    if Mode == "Drag" or Mode == "Bond":
+        if BondButton.draw():
+            if Mode == "Drag":
+                Mode = "Bond"
+            elif Mode == "Bond":
+                Mode = "Drag"
     
     if Mode == "Add":
         screen.blit(pause_screen, (0,0))
