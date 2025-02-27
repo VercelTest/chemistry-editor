@@ -11,7 +11,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
 AtomList = []
-Mode = "Drag"  # Modes: "Drag", "Add", "View", "Bond"
+Mode = "Drag"
 OverrideInformation = False
 user_text = ''
 
@@ -20,16 +20,13 @@ pygame.display.set_caption("Chemistry Editor")
 
 # Fonts
 TitleFont = pygame.font.Font('Fonts/Interphases Regular.ttf', 40)
-InputFont = pygame.font.Font('Fonts/Interphases Regular.ttf', 35)
 
 # Assets
-pause_screen = pygame.Surface((SCREEN_WIDTH,SCREEN_HEIGHT))
-pause_screen.set_alpha(128)
-pause_screen.fill('black')
+Information = TitleFont.render("Hi this is text", True, 'white')
+text_rect = Information.get_rect(center=(SCREEN_WIDTH/2, 30)) # center text
 
 AddButtonImage = pygame.image.load('Assets/Buttons/Add Button.png').convert_alpha()
 ViewButtonImage = pygame.image.load('Assets/Buttons/Magnifying.png').convert_alpha()
-BondButtonImage = pygame.image.load('Assets/Buttons/Bond Button.png').convert_alpha()  # Replace with actual bond button image
 
 # Classes
 class Button():
@@ -60,8 +57,7 @@ class Button():
 # Buttons
 AddButton = Button(SCREEN_WIDTH - 75, SCREEN_HEIGHT - 75, AddButtonImage, 75)
 ViewButton = Button(SCREEN_WIDTH - 150, SCREEN_HEIGHT - 75, ViewButtonImage, 75)
-# Add bond button position
-BondButton = Button(SCREEN_WIDTH - 225, SCREEN_HEIGHT - 75, BondButtonImage, 75)
+
 
 # Functions
 def newAtom(Type):
@@ -74,7 +70,7 @@ while True:
             pygame.quit()
             exit()
         
-        # prevent multi dragging bug & more functions
+        # prevent multi dragging bug
         for atom in reversed(AtomList):
             atom.check_dragging_priority(event, Mode)
 
@@ -84,7 +80,7 @@ while True:
                     Mode = "Drag"
                     if user_text.capitalize() in AtomImages:
                         newAtom(user_text.capitalize())
-                
+            
             elif event.key == pygame.K_BACKSPACE:
                 user_text = user_text[0:-1]
             else:
@@ -93,31 +89,21 @@ while True:
 
     screen.fill((0, 15, 38))
 
-    for atom in AtomList:
-        # Pass screen dimensions to physics method
-        data = atom.physics(Mode, AtomList, SCREEN_WIDTH, SCREEN_HEIGHT)  
-        atom.draw(screen)
+    # screen.blit(Information, text_rect)
 
-        if data:
-            OverrideInformation = True
-            Information = TitleFont.render(data, True, 'white')
+    for atom in AtomList:
+        data = atom.physics(Mode)  # Update physics
+        atom.draw(screen)
     
     if AddButton.draw():
         Mode = "Add"
         user_text = ''
     
     if ViewButton.draw():
-        if Mode == "Drag" or Mode == "Bond":
+        if Mode == "Drag":
             Mode = "View"
         elif Mode == "View":
             Mode = "Drag"
-    
-    if Mode == "Drag" or Mode == "Bond":
-        if BondButton.draw():
-            if Mode == "Drag":
-                Mode = "Bond"
-            elif Mode == "Bond":
-                Mode = "Drag"
     
     if Mode == "Add":
         screen.blit(pause_screen, (0,0))

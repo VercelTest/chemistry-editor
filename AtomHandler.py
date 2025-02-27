@@ -32,6 +32,7 @@ class Atom():
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos) and selected_atom is None:
+
                 if Mode == "Drag":
                     self.dragging = True
                     mousepos = pygame.mouse.get_pos()
@@ -141,140 +142,19 @@ class Atom():
         self.prev_pos = Vector2(self.x, self.y)
         self.rect.topleft = (self.x, self.y)
 
-    def physics(self, Mode, atom_list, screen_width=800, screen_height=400):
+    def physics(self, Mode):
         mousepos = pygame.mouse.get_pos()
-    
-        # Check if this atom or any bonded atom is being dragged
-        any_bonded_dragged = self.dragging
-        if not any_bonded_dragged and self.bonded:
-            for atom in self.bonded_atoms:
-                if atom.dragging:
-                    any_bonded_dragged = True
-                    break
         
-        if self.bonded:
-            if self.dragging:
-                # If this atom is bonded and being dragged, update positions of bonded atoms
-                self.update_bonded_atoms(screen_width, screen_height)
-            elif not any_bonded_dragged:
-                # If no atom in the bond group is being dragged, apply physics
-                self.freephysics(screen_width, screen_height)
-        else:
-            # Non-bonded atoms always get free physics
-            self.freephysics(screen_width, screen_height)
-            
-            # Check for collisions with other atoms
-            if Mode == "Bond":
-                self.check_for_bonding(atom_list)
+        if not self.bonded:
+            self.freephysics()
 
         if self.rect.collidepoint(mousepos):
             if Mode == "View":
-                if not self.bonded:
-                    return f"{self.name}, {self.ElectronsLeft} Valence Electron(s)"
-                else:
-                    bonded_names = [atom.name for atom in self.bonded_atoms]
-                    return f"{self.name} bonded with {', '.join(bonded_names)}"
-                
-    def check_for_bonding(self, atom_list):
-        # Only check for bonding if we have electrons available
-        if self.ElectronsLeft <= 0 or self.bonded and len(self.bonded_atoms) >= self.ElectronsLeft:
-            return
-            
-        for atom in atom_list:
-            if atom != self and not atom in self.bonded_atoms and atom.ElectronsLeft > 0:
-                # Calculate center points
-                self_center = Vector2(self.x + self.scale/2, self.y + self.scale/2)
-                atom_center = Vector2(atom.x + atom.scale/2, atom.y + atom.scale/2)
-                
-                # Calculate distance between centers
-                distance = self_center.distance_to(atom_center)
-                
-                # If atoms are close enough, bond them
-                if distance < (self.scale + atom.scale) / 2.5:  # Adjust this value for sensitivity
-                    self.bond_with(atom)
-                    return  # Only bond with one atom at a time
+                    if not self.bonded:
+                        return str(self.name) + ", " + str(self.ElectronsLeft) + " Valence Electron(s)"
+                    else:
+                        return "this is not available yet"
 
-    def bond_with(self, other_atom):
-        if other_atom not in self.bonded_atoms and self.ElectronsLeft > 0 and other_atom.ElectronsLeft > 0:
-            # Create the bond
-            self.bonded_atoms.append(other_atom)
-            other_atom.bonded_atoms.append(self)
-            
-            # Decrement available electrons
-            self.ElectronsLeft -= 1
-            other_atom.ElectronsLeft -= 1
-            
-            # Set bonded flag
-            self.bonded = True
-            other_atom.bonded = True
-            
-            # Arrange atoms
-            self.realign_bonded_atoms()
-
-    def realign_bonded_atoms(self, screen_width=800, screen_height=400):
-        if len(self.bonded_atoms) == 0:
-            return
-        
-        # Get center of this atom
-        center_x = self.x + self.scale / 2
-        center_y = self.y + self.scale / 2
-        
-        # Calculate angle step
-        angle_step = 2 * math.pi / len(self.bonded_atoms)
-        
-        # Calculate positioning radius (sum of radii plus a small gap)
-        for i, atom in enumerate(self.bonded_atoms):
-            # Calculate angle for this atom
-            angle = i * angle_step
-            
-            # Calculate distance for bonding (half of both scales plus a small gap)
-            distance = (self.scale + atom.scale) / 2
-            
-            # Calculate new position
-            new_x = center_x + math.cos(angle) * distance - (atom.scale / 2)
-            new_y = center_y + math.sin(angle) * distance - (atom.scale / 2)
-            
-            # Ensure the position is within screen boundaries
-            new_x = max(0, min(screen_width - atom.scale, new_x))
-            new_y = max(0, min(screen_height - atom.scale, new_y))
-            
-            # Update atom position
-            atom.x = new_x
-            atom.y = new_y
-            atom.rect.topleft = (atom.x, atom.y)
-            
-            # Update velocity to match this atom
-            atom.xvel = self.xvel
-            atom.yvel = self.yvel
-            
-            # Update atom's previous position
-            atom.prev_pos = Vector2(atom.x, atom.y)
-            
-    def update_bonded_atoms(self, screen_width=800, screen_height=400):
-        # Get movement delta
-        delta_x = self.x - self.prev_pos.x
-        delta_y = self.y - self.prev_pos.y
-        
-        # Move each bonded atom by the same delta
-        for atom in self.bonded_atoms:
-            # Calculate new position
-            new_x = atom.x + delta_x
-            new_y = atom.y + delta_y
-            
-            # Apply boundary checks
-            new_x = max(0, min(screen_width - atom.scale, new_x))
-            new_y = max(0, min(screen_height - atom.scale, new_y))
-            
-            # Update position
-            atom.x = new_x
-            atom.y = new_y
-            atom.rect.topleft = (atom.x, atom.y)
-            atom.prev_pos = Vector2(atom.x, atom.y)
-            
-            # Update velocity
-            atom.xvel = self.xvel
-            atom.yvel = self.yvel
-    
     def draw(self, screen):
         # Draw bonds
         if self.bonded:
