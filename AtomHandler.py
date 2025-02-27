@@ -143,11 +143,24 @@ class Atom():
 
     def physics(self, Mode, atom_list, screen_width=800, screen_height=400):
         mousepos = pygame.mouse.get_pos()
+    
+        # Check if this atom or any bonded atom is being dragged
+        any_bonded_dragged = self.dragging
+        if not any_bonded_dragged and self.bonded:
+            for atom in self.bonded_atoms:
+                if atom.dragging:
+                    any_bonded_dragged = True
+                    break
         
-        if self.bonded and self.dragging:
-            # If this atom is bonded and being dragged, update positions of bonded atoms
-            self.update_bonded_atoms(screen_width, screen_height)
-        elif not self.bonded:
+        if self.bonded:
+            if self.dragging:
+                # If this atom is bonded and being dragged, update positions of bonded atoms
+                self.update_bonded_atoms(screen_width, screen_height)
+            elif not any_bonded_dragged:
+                # If no atom in the bond group is being dragged, apply physics
+                self.freephysics(screen_width, screen_height)
+        else:
+            # Non-bonded atoms always get free physics
             self.freephysics(screen_width, screen_height)
             
             # Check for collisions with other atoms
@@ -161,7 +174,7 @@ class Atom():
                 else:
                     bonded_names = [atom.name for atom in self.bonded_atoms]
                     return f"{self.name} bonded with {', '.join(bonded_names)}"
-
+                
     def check_for_bonding(self, atom_list):
         # Only check for bonding if we have electrons available
         if self.ElectronsLeft <= 0 or self.bonded and len(self.bonded_atoms) >= self.ElectronsLeft:
