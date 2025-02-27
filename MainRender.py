@@ -20,10 +20,14 @@ pygame.display.set_caption("Chemistry Editor")
 
 # Fonts
 TitleFont = pygame.font.Font('Fonts/Interphases Regular.ttf', 40)
+InputFont = pygame.font.Font('Fonts/Interphases Regular.ttf', 35)
 
 # Assets
 Information = TitleFont.render("Hi this is text", True, 'white')
 text_rect = Information.get_rect(center=(SCREEN_WIDTH/2, 30)) # center text
+pause_screen = pygame.Surface((SCREEN_WIDTH,SCREEN_HEIGHT))
+pause_screen.set_alpha(128)
+pause_screen.fill('black')
 
 AddButtonImage = pygame.image.load('Assets/Buttons/Add Button.png').convert_alpha()
 ViewButtonImage = pygame.image.load('Assets/Buttons/Magnifying.png').convert_alpha()
@@ -94,6 +98,10 @@ while True:
     for atom in AtomList:
         data = atom.physics(Mode)  # Update physics
         atom.draw(screen)
+
+        if data:
+            OverrideInformation = True
+            Information = TitleFont.render(data, True, 'white')
     
     if AddButton.draw():
         Mode = "Add"
