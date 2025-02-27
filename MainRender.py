@@ -82,7 +82,7 @@ while True:
                     Mode = "Drag"
                     if user_text.capitalize() in AtomImages:
                         newAtom(user_text.capitalize())
-            
+                
             elif event.key == pygame.K_BACKSPACE:
                 user_text = user_text[0:-1]
             else:

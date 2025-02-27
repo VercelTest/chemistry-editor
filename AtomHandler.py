@@ -1,6 +1,7 @@
 import pygame
 from MathFuncs import *
 from AtomPresets import AtomValenceValues
+import math
 
 selected_atom = None
 Vector2 = pygame.math.Vector2
@@ -113,5 +114,36 @@ class Atom():
                     else:
                         return "this is not available yet"
 
+
+    # broken
+    def bond_with(self, other_atom):
+        if other_atom not in self.bonded_atoms and len(self.bonded_atoms) < self.ElectronsLeft:
+            self.bonded_atoms.append(other_atom)
+            other_atom.bonded_atoms.append(self)
+            self.bonded = True
+            other_atom.bonded = True
+            self.realign_bonded_atoms()
+
+    def realign_bonded_atoms(self):
+        if len(self.bonded_atoms) == 0:
+            return
+        
+        angle_step = 360 / len(self.bonded_atoms)
+        radius = self.scale // 2 + 10
+        
+        for index, atom in enumerate(self.bonded_atoms):
+            angle = math.radians(index * angle_step)
+            atom.x = self.x + radius * math.cos(angle)
+            atom.y = self.y + radius * math.sin(angle)
+            atom.rect.topleft = (atom.x, atom.y)
+            
+    def update_bonded_atoms(self):
+        for atom in self.bonded_atoms:
+            atom.xvel = self.xvel
+            atom.yvel = self.yvel
+            atom.x += self.xvel
+            atom.y += self.yvel
+            atom.rect.topleft = (atom.x, atom.y)
+    
     def draw(self, screen):
         screen.blit(self.type, (self.x, self.y))
