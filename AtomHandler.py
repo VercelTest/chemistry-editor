@@ -10,7 +10,12 @@ class Atom():
     def __init__(self, type, image):
         self.name = type
         self.type = image
-        self.ValenceElectronType = AtomValenceValues[type]
+
+        if AtomValenceValues[self.name] > 3: 
+            self.ValenceElectronType =  "Gain"
+        else:
+            self.ValenceElectronType =  "Lose"
+
         self.x = 400
         self.y = 200  
         self.xvel = 0
@@ -20,7 +25,7 @@ class Atom():
         self.scale = image.get_width()
         self.rect.topleft = (self.x, self.y)
 
-        self.ElectronsLeft = self.ValenceElectronType
+        self.ElectronsLeft = AtomValenceValues[self.name]
         self.bonded = False
         self.bonded_atoms = []  # Initialize the bonded_atoms list
         self.dragging = False  
@@ -44,68 +49,28 @@ class Atom():
                 self.dragging = False
                 selected_atom = None
 
-    # Check if a move would push any atom in the bonded group off-screen
-    def is_valid_move(self, delta_x, delta_y, screen_width, screen_height):
-        # Check this atom first
-        new_x = self.x + delta_x
-        new_y = self.y + delta_y
-        
-        if new_x < 0 or new_x + self.scale > screen_width or new_y < 0 or new_y + self.scale > screen_height:
-            return False
-            
-        # Then check all bonded atoms
-        for atom in self.bonded_atoms:
-            new_x = atom.x + delta_x
-            new_y = atom.y + delta_y
-            
-            if new_x < 0 or new_x + atom.scale > screen_width or new_y < 0 or new_y + atom.scale > screen_height:
-                return False
-                
-        return True
-
-    # basically only free physics so change this later
-    def freephysics(self, screen_width=800, screen_height=400):
+    def freephysics(self):
         mousepos = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()[0]
 
         # EVENTS
         if self.dragging:
-            # Calculate potential new position
-            new_x = mousepos[0] - self.offset.x
-            new_y = mousepos[1] - self.offset.y
-            
-            # Calculate potential movement
-            delta_x = new_x - self.x
-            delta_y = new_y - self.y
-            
-            # Check if this move is valid (doesn't push any atom off-screen)
-            if self.bonded and not self.is_valid_move(delta_x, delta_y, screen_width, screen_height):
-                # If not valid, find the maximum valid movement
-                # This is a simplified approach - we just don't move in that direction
-                if not self.is_valid_move(delta_x, 0, screen_width, screen_height):
-                    delta_x = 0
-                if not self.is_valid_move(0, delta_y, screen_width, screen_height):
-                    delta_y = 0
-                    
-                # Apply the adjusted movement
-                self.x += delta_x
-                self.y += delta_y
-            else:
-                # Apply normal movement with boundary checks
-                self.x = new_x
-                self.y = new_y
-                
-                # Apply boundary checks for this atom
-                if self.x > screen_width - self.scale:
-                    self.x = screen_width - self.scale
-                if self.x < 0:
-                    self.x = 0
-                if self.y > screen_height - self.scale:
-                    self.y = screen_height - self.scale
-                if self.y < 0:
-                    self.y = 0
-            
-            # Calculate velocity based on movement
+            self.x = mousepos[0] - self.offset.x
+            self.y = mousepos[1] - self.offset.y
+
+            # edges
+            if self.x > 800 - self.scale:
+                self.x = 800 - self.scale
+
+            if self.x < 0:
+                self.x = 0
+
+            if self.y > 400 - self.scale:
+                self.y = 400 - self.scale
+
+            if self.y < 0:
+                self.y = 0
+
             self.xvel = self.x - self.prev_pos.x
             self.yvel = self.y - self.prev_pos.y
 
@@ -113,61 +78,65 @@ class Atom():
             self.dragging = False  
 
         if not self.dragging:
-            # Calculate potential new position with physics
-            new_x = self.x + self.xvel
-            new_y = self.y + self.yvel
-            
-            # Check boundaries for this atom
-            if new_x > screen_width - self.scale:
-                new_x = screen_width - self.scale
-                self.xvel *= -1
-            if new_x < 0:
-                new_x = 0
-                self.xvel *= -1
-            if new_y > screen_height - self.scale:
-                new_y = screen_height - self.scale
-                self.yvel *= -1
-            if new_y < 0:
-                new_y = 0
-                self.yvel *= -1
-                
-            # Apply movement
-            self.x = new_x
-            self.y = new_y
-            
-            # Apply friction
+            self.x += self.xvel
+            self.y += self.yvel
+
+            # friction
             self.xvel *= 0.95
             self.yvel *= 0.95
+
+            # edges
+            if self.x > 800 - self.scale:
+                self.x = 800 - self.scale
+                self.xvel *= -1
+
+            if self.x < 0:
+                self.x = 0
+                self.xvel *= -1
+
+            if self.y > 400 - self.scale:
+                self.y = 400 - self.scale
+                self.yvel *= -1
+
+            if self.y < 0:
+                self.y = 0
+                self.yvel *= -1
 
         self.prev_pos = Vector2(self.x, self.y)
         self.rect.topleft = (self.x, self.y)
 
+    def equalize_valence(self, atom):
+        return
+        
+    def detect_bond(self, AtomList):
+        for atom in AtomList:
+            if self.rect.collidepoint((atom.x, atom.y)) and atom != self and self.ElectronsLeft > 1:
+                self.bonded = True
+                atom.bonded = True
+
+                if not atom in self.bonded_atoms:
+                    self.bonded_atoms.append(atom)
+                    self.equalize_valence(atom)
+                
+                if not self in atom.bonded_atoms:
+                    atom.bonded_atoms.append(self)
+
+    def format_atoms(self):
+        print(self.bonded_atoms)
+    
     def physics(self, Mode):
         mousepos = pygame.mouse.get_pos()
         
         if not self.bonded:
             self.freephysics()
+        
 
         if self.rect.collidepoint(mousepos):
             if Mode == "View":
                     if not self.bonded:
                         return str(self.name) + ", " + str(self.ElectronsLeft) + " Valence Electron(s)"
                     else:
-                        return "this is not available yet"
+                        return str(self.ElectronsLeft)
 
     def draw(self, screen):
-        # Draw bonds
-        if self.bonded:
-            center_x = self.x + self.scale / 2
-            center_y = self.y + self.scale / 2
-            
-            for atom in self.bonded_atoms:
-                atom_center_x = atom.x + atom.scale / 2
-                atom_center_y = atom.y + atom.scale / 2
-                
-                # Draw a line representing the bond
-                pygame.draw.line(screen, (255, 255, 255), 
-                                 (center_x, center_y), 
-                                 (atom_center_x, atom_center_y), 2)
-        
         screen.blit(self.type, (self.x, self.y))

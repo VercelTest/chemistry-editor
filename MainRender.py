@@ -96,8 +96,9 @@ while True:
     # screen.blit(Information, text_rect)
 
     for atom in AtomList:
-        data = atom.physics(Mode)  # Update physics
+        data = atom.physics(Mode)
         atom.draw(screen)
+        atom.detect_bond(AtomList)
 
         if data:
             OverrideInformation = True
