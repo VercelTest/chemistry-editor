@@ -1,19 +1,12 @@
 import pygame
 from MathFuncs import *
 from AtomPresets import AtomValenceValues
+from AtomPresets import AlternateMolStructures
 from AtomPresets import BondingRules
 import math
 
 selected_atom = None
 Vector2 = pygame.math.Vector2
-
-def check_lists(a, b):
-    # Sort both lists
-    a.sort()
-    b.sort()
-    
-    # Compare if sorted lists are the same
-    return a == b
 
 class Atom():
     def __init__(self, type, image):
@@ -92,8 +85,8 @@ class Atom():
             self.y += self.yvel
 
             # friction
-            self.xvel *= 0.95
-            self.yvel *= 0.95
+            self.xvel *= 0.98
+            self.yvel *= 0.98
 
             # edges
             if self.x > 800 - self.scale:
@@ -140,7 +133,9 @@ class Atom():
                 ideal_distance = (self.scale + atom.scale) // 2 
 
                 if distance <= ideal_distance:
+                    # check if in alternate mol structures (bypassing valence)
                     estimatedlist = []
+                    objectsorted = {}
 
                     if not atom in self.bonded_atoms:
                         estimatedlist.append(atom.name)
@@ -151,14 +146,33 @@ class Atom():
 
                     estimatedlist.append(self.name)
                     
-                    if check_lists(estimatedlist, ):
-                        print("OMGG")
+                    estimatedlist.sort()
 
-                    self.equalize_valence(atom)
+                    override = False
+                    if tuple(estimatedlist) in AlternateMolStructures:
+                        override = True
 
-                    if atom not in self.bonded_atoms:
+                        print(AlternateMolStructures[tuple(estimatedlist)])
+
+                        if not atom in self.bonded_atoms:
+                            objectsorted.setdefault(atom.name, []).append(atom)
+
+                        for bonded in self.bonded_atoms:
+                            objectsorted.setdefault(bonded.name, []).append(bonded)
+                        
+                        objectsorted.setdefault(self.name, []).append(self)
+
+                        print(objectsorted)
+
+                    if atom not in self.bonded_atoms and ((self.ElectronsLeft != 0 and self.ElectronsLeft != 8 and atom.ElectronsLeft != 0 and atom.ElectronsLeft != 8) or override == True):
                         self.bonded = True
                         atom.bonded = True
+                        
+                        self.equalize_valence(atom)
+
+                        # override valence electrons
+                        if tuple(estimatedlist) in AlternateMolStructures:
+                            objectsorted
 
                         print("NEW BOND DETECTED")
                         self.bonded_atoms.append(atom)

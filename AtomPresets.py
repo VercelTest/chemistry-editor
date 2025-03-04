@@ -56,7 +56,7 @@ for atom in AtomValenceValues.keys():
     val = AtomValenceValues[atom]
     BondingRules[(atom, atom)] = determine_bond(val, val)
 
-MolecularStructures = {
+AlternateMolStructures = {
     ("Carbon", "Oxygen", "Oxygen"): [0, 8, 8],
     ("Carbon", "Oxygen", "Oxygen", "Oxygen"): [0, 8, 8, 6],
     ("Sulfur", "Oxygen", "Oxygen"): [8, 8, 8],
@@ -64,8 +64,8 @@ MolecularStructures = {
     ("Sulfur", "Oxygen", "Oxygen", "Oxygen", "Oxygen"): [8, 8, 7, 7],
 }
 
-MolecularStructures = {
-    tuple(sorted(key)): value for key, value in MolecularStructures.items()
+AlternateMolStructures = {
+    tuple(sorted(key)): value for key, value in AlternateMolStructures.items()
 }
 
 CommonMolecules = {
@@ -87,8 +87,7 @@ CommonMolecules = {
     "NaCl": "Salt",
 }
 
-def get_molecule_name(self):
-    """ Returns the common name of the molecule if available, otherwise returns the formula. """
-    formula = self.generate_molecular_formula()
+def get_molecule_name(list):
+    formula = list.generate_molecular_formula()
     return CommonMolecules.get(formula, formula)  # Return name if found, else return formula
 
