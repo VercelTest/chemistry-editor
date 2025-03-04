@@ -62,7 +62,6 @@ class Button():
 AddButton = Button(SCREEN_WIDTH - 75, SCREEN_HEIGHT - 75, AddButtonImage, 75)
 ViewButton = Button(SCREEN_WIDTH - 150, SCREEN_HEIGHT - 75, ViewButtonImage, 75)
 
-
 # Functions
 def newAtom(Type):
     AtomList.append(Atom(Type, AtomImages[Type]))
@@ -98,7 +97,7 @@ while True:
     for atom in AtomList:
         data = atom.physics(Mode)
         atom.draw(screen)
-        atom.detect_bond(AtomList)
+        atom.detectbond(AtomList)
 
         if data:
             OverrideInformation = True

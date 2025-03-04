@@ -1,4 +1,5 @@
 import pygame
+from itertools import permutations
 
 # Adjusted atom sizes (scaled down to fit 400x800 screen)
 AtomImages = {
@@ -31,4 +32,63 @@ AtomValenceValues = {
     "Sulfur": 6,
 }
 
+BondingRules = {}
+
+def determine_bond(val1, val2):
+    if val1 <= 3 and val2 > 3:
+        return (-val1, min(val1, 8 - val2)) 
+    elif val1 > 3 and val2 <= 3:
+        return (min(val2, 8 - val1), -val2)
+    
+    needed1 = 2 - val1 if val1 == 1 else 8 - val1
+    needed2 = 2 - val2 if val2 == 1 else 8 - val2 
+    bond_strength = min(needed1, needed2)
+    return (-bond_strength, -bond_strength) 
+
+
+for atom1, atom2 in permutations(AtomValenceValues.keys(), 2):
+    val1, val2 = AtomValenceValues[atom1], AtomValenceValues[atom2]
+    BondingRules[(atom1, atom2)] = determine_bond(val1, val2)
+    BondingRules[(atom2, atom1)] = determine_bond(val2, val1) 
+
+# self bonds
+for atom in AtomValenceValues.keys():
+    val = AtomValenceValues[atom]
+    BondingRules[(atom, atom)] = determine_bond(val, val)
+
+MolecularStructures = {
+    ("Carbon", "Oxygen", "Oxygen"): [0, 8, 8],
+    ("Carbon", "Oxygen", "Oxygen", "Oxygen"): [0, 8, 8, 6],
+    ("Sulfur", "Oxygen", "Oxygen"): [8, 8, 8],
+    ("Sulfur", "Oxygen", "Oxygen", "Oxygen"): [8, 8, 8, 8],
+    ("Sulfur", "Oxygen", "Oxygen", "Oxygen", "Oxygen"): [8, 8, 7, 7],
+}
+
+MolecularStructures = {
+    tuple(sorted(key)): value for key, value in MolecularStructures.items()
+}
+
+CommonMolecules = {
+    "H2O": "Water",
+    "CO2": "Carbon Dioxide",
+    "CO": "Carbon Monoxide",
+    "CO3": "Carbonate Ion",
+    "HCO3": "Bicarbonate Ion",
+    "NaHCO3": "Baking Soda",
+    "O2": "Oxygen Gas",
+    "N2": "Nitrogen Gas",
+    "N2": "Chlorine Gas",
+    "F2": "Fluorine Gas",
+    "NH3": "Ammonia",
+    "CH4": "Methane",
+    "SO4": "Sulfate Ion",
+    "NO3": "Nitrate Ion",
+    "H2SO4": "Sulfuric Acid",
+    "NaCl": "Salt",
+}
+
+def get_molecule_name(self):
+    """ Returns the common name of the molecule if available, otherwise returns the formula. """
+    formula = self.generate_molecular_formula()
+    return CommonMolecules.get(formula, formula)  # Return name if found, else return formula
 
