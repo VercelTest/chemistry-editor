@@ -56,38 +56,49 @@ for atom in AtomValenceValues.keys():
     val = AtomValenceValues[atom]
     BondingRules[(atom, atom)] = determine_bond(val, val)
 
+for pair, values in BondingRules.items():
+    print(f"{pair}: {values}")
+
 AlternateMolStructures = {
     ("Carbon", "Oxygen", "Oxygen"): [0, 8, 8],
     ("Carbon", "Oxygen", "Oxygen", "Oxygen"): [0, 8, 8, 6],
     ("Sulfur", "Oxygen", "Oxygen"): [8, 8, 8],
     ("Sulfur", "Oxygen", "Oxygen", "Oxygen"): [8, 8, 8, 8],
     ("Sulfur", "Oxygen", "Oxygen", "Oxygen", "Oxygen"): [8, 8, 7, 7],
+    
 }
 
+'''
 AlternateMolStructures = {
     tuple(sorted(key)): value for key, value in AlternateMolStructures.items()
 }
+'''
 
 CommonMolecules = {
     "H2O": "Water",
     "CO2": "Carbon Dioxide",
     "CO": "Carbon Monoxide",
-    "CO3": "Carbonate Ion",
-    "HCO3": "Bicarbonate Ion",
+    "CO3": "Carbonate (Unstable)",
+    "HCO3": "Bicarbonate (Unstable)",
     "NaHCO3": "Baking Soda",
+    "NaHO": "Sodium Hydroxide",
+    "HCl": "Hydrochloric Acid",
+    "H2": "Hydrogen Gas",
+    "HO": "Hydroxide (Unstable)",
     "O2": "Oxygen Gas",
     "N2": "Nitrogen Gas",
     "N2": "Chlorine Gas",
     "F2": "Fluorine Gas",
-    "NH3": "Ammonia",
-    "CH4": "Methane",
-    "SO4": "Sulfate Ion",
-    "NO3": "Nitrate Ion",
+    "H3N": "Ammonia",
+    "H4C": "Methane",
+    "SO4": "Sulfate (Unstable)",
+    "NO3": "Nitrate (Unstable)",
+    "H2O2": "Hydrogen Peroxide",
     "H2SO4": "Sulfuric Acid",
+    "NaClO": "Bleach",
+    "HClO": "Pool Cleaner",
+    "SiO2": "Silica",
     "NaCl": "Salt",
+    "CN": "Cyanide (Unstable)",
+    "HCN": "Hydrogen Cyanide",
 }
-
-def get_molecule_name(list):
-    formula = list.generate_molecular_formula()
-    return CommonMolecules.get(formula, formula)  # Return name if found, else return formula
-

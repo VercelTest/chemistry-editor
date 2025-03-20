@@ -34,6 +34,41 @@ def gather_all_bonded_atoms(atom, visited=None):
 selected_atom = None
 Vector2 = pygame.math.Vector2
 
+element_symbols = {
+    "Aluminum": "Al",
+    "Boron": "B",
+    "Carbon": "C",
+    "Chlorine": "Cl",
+    "Fluorine": "F",
+    "Hydrogen": "H",
+    "Nitrogen": "N",
+    "Oxygen": "O",
+    "Phosphorus": "P",
+    "Silicon": "Si",
+    "Sodium": "Na",
+    "Sulfur": "S"
+}
+
+symbol_priority = {
+    "Na": 1, "H": 2, "C": 3, "Al": 4, "B": 5, "Cl": 6, "F": 7, "N": 8, "P": 9, "S": 10, "Si": 11, "O": 12
+}
+
+# gpt new method
+def gather_all_bonded_atoms(atom, visited=None):
+    if visited is None:
+        visited = set()
+
+    if atom in visited:
+        return []
+
+    visited.add(atom)
+
+    atoms = [atom]
+    for bonded_atom in atom.bonded_atoms:
+        atoms.extend(gather_all_bonded_atoms(bonded_atom, visited))
+
+    return atoms
+
 class Atom():
     def __init__(self, type, image):
         self.name = type
@@ -143,8 +178,21 @@ class Atom():
         self.ElectronsLeft += bond_values[0]
         otheratom.ElectronsLeft += bond_values[1]
 
-        return bond_values[0]         
-        
+        return bond_values[0]
+
+    def gen_formula(self):
+        atom_symbols = [element_symbols[atom.name] for atom in gather_all_bonded_atoms(self)]
+        atom_counts = Counter(atom_symbols)
+
+        # Sort by priority
+        sorted_atoms = sorted(atom_counts.items(), key=lambda item: symbol_priority.get(item[0], float('inf')))
+
+        formula = ""
+        for element, count in sorted_atoms:
+            formula += element if count == 1 else f"{element}{count}"  # No number if count = 1
+
+        return CommonMolecules.get(formula, formula) 
+
     def detectbond(self, AtomList):
         for atom in AtomList:
             if atom != self:
