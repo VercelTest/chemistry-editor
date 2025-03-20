@@ -1,9 +1,35 @@
 import pygame
 from MathFuncs import *
-from AtomPresets import AtomValenceValues
-from AtomPresets import AlternateMolStructures
-from AtomPresets import BondingRules
+from AtomPresets import AtomValenceValues, AlternateMolStructures, CommonMolecules, BondingRules
 import math
+from collections import Counter
+
+
+element_symbols = {
+    "Aluminum": "Al", "Boron": "B", "Carbon": "C", "Chlorine": "Cl", "Fluorine": "F",
+    "Hydrogen": "H", "Nitrogen": "N", "Oxygen": "O", "Phosphorus": "P", "Silicon": "Si",
+    "Sodium": "Na", "Sulfur": "S"
+}
+
+symbol_priority = {
+    "C": 1, "H": 2, "O": 3, "Al": 4, "B": 5, "Cl": 6, "F": 7, 
+    "N": 8, "P": 9, "Si": 10, "Na": 11, "S": 12
+}
+
+def gather_all_bonded_atoms(atom, visited=None):
+        if visited is None:
+            visited = set()
+
+        if atom in visited:
+            return []
+
+        visited.add(atom)
+
+        atoms = [atom]
+        for bonded_atom in atom.bonded_atoms:
+            atoms.extend(gather_all_bonded_atoms(bonded_atom, visited))
+
+        return atoms
 
 selected_atom = None
 Vector2 = pygame.math.Vector2
@@ -248,9 +274,19 @@ class Atom():
         for atom in self.bonded_atoms:
             atom.prev_pos = Vector2(atom.x, atom.y)
 
-    def format_atoms(self):
-        print(self.bonded_atoms)
-    
+    def gen_formula(self):
+        atom_symbols = [element_symbols[atom.name] for atom in gather_all_bonded_atoms(self)]
+        atom_counts = Counter(atom_symbols)
+
+        # Sort by priority
+        sorted_atoms = sorted(atom_counts.items(), key=lambda item: symbol_priority.get(item[0], float('inf')))
+
+        formula = ""
+        for element, count in sorted_atoms:
+            formula += element if count == 1 else f"{element}{count}"  # No number if count = 1
+
+        return CommonMolecules.get(formula, formula) 
+        
     def physics(self, Mode):
         mousepos = pygame.mouse.get_pos()
         
@@ -265,7 +301,7 @@ class Atom():
                     if not self.bonded:
                         return str(self.name) + ", " + str(self.ElectronsLeft) + " Valence Electron(s)"
                     else:
-                        return str(self.ElectronsLeft)
+                        return self.gen_formula(self)
 
     def draw(self, screen):
         screen.blit(self.type, (self.x, self.y))
