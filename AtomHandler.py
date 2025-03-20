@@ -349,7 +349,7 @@ class Atom():
                     if not self.bonded:
                         return str(self.name) + ", " + str(self.ElectronsLeft) + " Valence Electron(s)"
                     else:
-                        return self.gen_formula(self)
+                        return self.gen_formula()
 
     def draw(self, screen):
         screen.blit(self.type, (self.x, self.y))
